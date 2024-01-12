@@ -1,0 +1,88 @@
+piVersion: v1
+kind: PersistentVolume
+metadata:
+  name: wurmsave-pv
+spec:
+  storageClassName: ""
+  capacity:
+    storage: 5Gi
+  accessModes:
+    - ReadOnlyMany
+  hostPath:
+    path: "where/your/wurm/map/folder/is"
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: wurmsave-pvc
+  labels:
+    app: wurmmapgen
+spec:
+  accessModes:
+    - ReadOnlyMany
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: wurmhttp-pv
+spec:
+  storageClassName: ""
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/where/you/want/your/html/files/on/host"
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: wurmhttp-pvc
+  labels:
+    app: wurmmapgen
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: wurmmapgen-job
+  labels:
+    app: wurmmapgen
+spec:
+  concurrencyPolicy: Forbid
+  # Run this at 12 am daily
+  schedule: '0 0 * * *'
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      activeDeadlineSeconds: 600
+      template:
+        metadata:
+          labels:
+            app: wurmmapgen
+        spec:
+          volumes:
+          - name: wurmsave-pvc
+            persistentVolumeClaim:
+              claimName: wurmsave-pvc
+          - name: wurmhttp-pvc
+            persistentVolumeClaim:
+              claimName: wurmhttp-pvc
+          containers:
+          - name: wurmmapgen
+            image: git.racky.systems/unixbird/wurmmapgen
+            imagePullPolicy: IfNotPresent
+            volumeMounts:
+             - name: wurmsave-pvc
+               mountPath: /home/mapgen/wurmsave
+             - name: wurmhttp-pvc
+               mountPath: /home/mapgen/wurmhttp
+          restartPolicy: OnFailure
