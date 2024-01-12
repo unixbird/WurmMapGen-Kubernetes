@@ -78,7 +78,7 @@ spec:
               claimName: wurmhttp-pvc
           containers:
           - name: wurmmapgen
-            image: git.racky.systems/unixbird/wurmmapgen
+            image: unixbird/wurmmapgen-kubernetes
             imagePullPolicy: IfNotPresent
             volumeMounts:
              - name: wurmsave-pvc
