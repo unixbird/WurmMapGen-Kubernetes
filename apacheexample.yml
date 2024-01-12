@@ -1,0 +1,91 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: wurmweb-ingress
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt"
+spec:
+  tls:
+    - hosts:
+      - wurmmapgen.example.com
+      secretName: wurmweb
+  ingressClassName: nginx
+  rules:
+    - host: wurmmapgen.example.com
+      http:
+        paths:
+        - path: /
+          pathType: Prefix
+          backend:
+            service:
+              name: wurmweb
+              port:
+                number: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: wurmweb
+spec:
+  selector:
+    app: wurmweb
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: wurmweb-pv
+spec:
+  storageClassName: ""
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadOnlyMany
+  hostPath:
+    path: "/your/wurmgen/output/folder"
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: wurmweb-pvc
+  labels:
+    app: wurmweb
+spec:
+  accessModes:
+    - ReadOnlyMany
+  resources:
+    requests:
+      storage: 1Gi
+      ---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wurmweb-deployment
+  labels:
+    app: wurmweb
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: wurmweb
+  template:
+    metadata:
+      labels:
+        app: wurmweb
+    spec:
+      volumes:
+      - name: wurmweb-pvc
+        persistentVolumeClaim:
+           claimName: wurmweb-pvc
+      containers:
+      - name: wurmweb
+        image: unixbird/apache-php-mysql
+        imagePullPolicy: IfNotePresent
+        volumeMounts:
+         - name: wurmweb-pvc
+           mountPath: /var/www
+        ports:
+        - containerPort: 80
