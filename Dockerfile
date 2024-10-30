@@ -1,6 +1,4 @@
-FROM openjdk:11
-
-RUN apt update && apt install unzip
+FROM bellsoft/liberica-runtime-container:jdk-11-glibc
 
 WORKDIR /home/mapgen
 RUN mkdir wurmsave wurmhttp
@@ -16,4 +14,4 @@ USER mapgen
 RUN unzip *.zip
 COPY --chmod=755 WurmMapGen.properties /home/mapgen/
 
-ENTRYPOINT ["/home/mapgen/start.sh"]
+ENTRYPOINT ["java", "-jar",  "/home/mapgen/WurmMapGen.jar"]
