@@ -82,10 +82,10 @@ spec:
            claimName: wurmweb-pvc
       containers:
       - name: wurmweb
-        image: unixbird/apache-php-mysql
+        image: httpd:alpine
         imagePullPolicy: IfNotePresent
         volumeMounts:
          - name: wurmweb-pvc
-           mountPath: /var/www
+           mountPath: /usr/local/apache2/htdocs
         ports:
         - containerPort: 80
