@@ -19,9 +19,9 @@ In my example I use hostPaths as this is just deployed in a single node cluster.
 3. The user inside the container is mapped to PUID/GUID 1000:1000. Make sure that this user is able to access the Wurm World. As long as the permissions are set it will run once every 24 hours and generate a new map!
 
 ## What about an apache server included?
-I didn't want to make the image bigger than it needed to be and wanted to follow the "do one thing per container" philosophy. Fortunately I also have a simple apache container image to serve the output that the WurmMapGen generates.
+I didn't want to make the image bigger than it needed to be and wanted to follow the "do one thing per container" philosophy. Fortunately apache is simple to deploy and I have a simple apache deployment example to serve the output that the WurmMapGen generates.
 
-1. Download the apacheexample.yml or clone the repo and run ```kubectl apply -f apacheexample.yml``` and it should be deployed (this is assuming you have cert-manager and ingress-nginx already deployed and setup in your cluster.)
+1. Download the apacheexample.yml or clone the repo and run ```kubectl apply -f apacheexample.yml``` after editing it to fit your needs and it should be deployed (this is assuming you have cert-manager and ingress-nginx already deployed and setup in your cluster.)
 2. That's it. It should be serving the map once it's been deployed.
 
 -------------------------------------------------------------
